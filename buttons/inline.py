@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 gender = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -9,14 +10,11 @@ gender = InlineKeyboardMarkup(
     ], resize_keyboard=True
 )
 
-rate = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text='1️⃣', callback_data='1'),
-            InlineKeyboardButton(text='2️⃣', callback_data='2'),
-            InlineKeyboardButton(text='3️⃣', callback_data='3'),
-            InlineKeyboardButton(text='4️⃣', callback_data='4'),
-            InlineKeyboardButton(text='5️⃣', callback_data='5'),
-        ]
-    ], resize_keyboard=True
-)
+
+def items_inline(data: list):
+    markup = InlineKeyboardBuilder()
+    for item in data:
+        markup.button(text=f"{item['name']} / {item['name_ru']}",
+                      callback_data=f"{item['id']}:{item['name']} / {item['name_ru']} ")
+    markup.adjust(3, repeat=True)
+    return markup.as_markup()

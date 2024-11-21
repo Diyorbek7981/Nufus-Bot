@@ -2,7 +2,7 @@ from aiogram import F, Router, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, CommandStart, and_f
 from buttons.reply import menu, phone, check, feedback_verify
-from buttons.inline import gender, rate
+from buttons.inline import items_inline
 from states import SignupStates
 from aiogram.fsm.context import FSMContext
 from config import ADMIN, API
@@ -27,8 +27,9 @@ async def signup(message: Message, state: FSMContext):
         await message.answer(f'👤To\'liq Ismingizni kiriting')
         await state.set_state(SignupStates.name)
     else:
-        await message.answer(f"📝Fikr-mulohazalaringizni qoldiring")
-        await state.set_state(SignupStates.feedback)
+        iteam = requests.get(url=f"{API}/items/").json()
+        await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+        await state.set_state(SignupStates.items)
 
 
 @router.message(Command("stop"))
@@ -46,6 +47,7 @@ async def state_name(message: Message, state: FSMContext):
     curent = await state.get_state()
 
     res = requests.get(url=f"{API}/users/{message.from_user.id}")
+    iteam = requests.get(url=f"{API}/items/").json()
     if res.status_code == 404:
         if curent == None:
             await message.answer(f"❗ Fikr-mulohazalaringizni qoldirish uchun botda ro'yhatdan o'ting")
@@ -58,12 +60,12 @@ async def state_name(message: Message, state: FSMContext):
 
     else:
         if curent == None:
-            await message.answer(f"📝Fikr-mulohazalaringizni qoldiring", reply_markup=menu)
-            await state.set_state(SignupStates.feedback)
+            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+            await state.set_state(SignupStates.items)
         else:
             await state.clear()
-            await message.answer(f"📝Fikr-mulohazalaringizni qoldiring", reply_markup=menu)
-            await state.set_state(SignupStates.feedback)
+            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+            await state.set_state(SignupStates.items)
 
 
 @router.message(SignupStates.name)
@@ -71,36 +73,36 @@ async def state_name(message: Message, state: FSMContext):
     if 4 <= len(message.text) <= 50:
         if not any(digit in message.text for digit in '0123456789'):
             await state.update_data(name=message.text)
-            await message.answer(f"✅Ism qabul qilindi\n👤{message.text}")
-            await message.answer(f"👱🏻‍♂️/👩Jinsingizni ko'rsating", reply_markup=gender)
-            await state.set_state(SignupStates.gender)
+            await message.answer(f"✅Ism qabul qilindi\n👤 {message.text}")
+            await message.answer(f"📅Yoshingizni kiriting")
+            await state.set_state(SignupStates.age)
         else:
             await message.answer("❌ Ismda raqamlar bo\'lishi mumkunemas")
     else:
         await message.answer("❌ Kiritgan malumotingiz uzunligi xato")
 
 
-@router.callback_query(SignupStates.gender)
-async def state_name(call: CallbackQuery, state: FSMContext):
-    if call.data == 'Erkak':
-        await state.update_data(gender=call.data)
-        await call.message.answer(f"✅Jins qabul qilindi\n👱‍♂️{call.data}")
-        await call.message.answer(f"📅Yoshingizni kiriting")
-        await state.set_state(SignupStates.age)
-    elif call.data == 'Ayol':
-        await state.update_data(gender=call.data)
-        await call.message.answer(f"✅Jins qabul qilindi\n👩{call.data}")
-        await call.message.answer(f"📅Yoshingizni kiriting")
-        await state.set_state(SignupStates.age)
-    else:
-        await call.message.answer(f"❌To'g'ri malumot kiriting", reply_markup=gender)
+# @router.callback_query(SignupStates.gender)
+# async def state_name(call: CallbackQuery, state: FSMContext):
+#     if call.data == 'Erkak':
+#         await state.update_data(gender=call.data)
+#         await call.message.answer(f"✅Jins qabul qilindi\n👱‍♂️{call.data}")
+#         await call.message.answer(f"📅Yoshingizni kiriting")
+#         await state.set_state(SignupStates.age)
+#     elif call.data == 'Ayol':
+#         await state.update_data(gender=call.data)
+#         await call.message.answer(f"✅Jins qabul qilindi\n👩{call.data}")
+#         await call.message.answer(f"📅Yoshingizni kiriting")
+#         await state.set_state(SignupStates.age)
+#     else:
+#         await call.message.answer(f"❌To'g'ri malumot kiriting", reply_markup=gender)
 
 
 @router.message(SignupStates.age)
 async def state_name(message: Message, state: FSMContext):
     if message.text.isdigit() and 4 < int(message.text) < 150:
         await state.update_data(age=message.text)
-        await message.answer(f"✅Yosh qabul qilindi\n📅{message.text}")
+        await message.answer(f"✅Yosh qabul qilindi\n📅 {message.text}")
         await message.answer(f"📞Telefon raqamingizni jo'nating", reply_markup=phone)
         await state.set_state(SignupStates.phone)
     else:
@@ -111,13 +113,12 @@ async def state_name(message: Message, state: FSMContext):
 async def state_name(message: Message, state: FSMContext):
     if message.contact:
         await state.update_data(phone=message.contact.phone_number)
-        await message.answer(f"✅Telefon raqam qabul qilindi\n📞{message.contact.phone_number}")
+        await message.answer(f"✅Telefon raqam qabul qilindi\n📞 {message.contact.phone_number}")
 
         data = await state.get_data()
 
-        user = (f"{message.from_user.mention_html('👤📝User malumotlari:')}\n"
+        user = (f"{message.from_user.mention_html('👤📝User malumotlari:')}\n\n"
                 f"👤Ism: {data.get('name')}\n"
-                f"👱🏻‍♂️/👩Jinsi: {data.get('gender')}\n"
                 f"📅Yosh: {data.get('age')}\n"
                 f"📱Telegram: @{message.from_user.username}\n"
                 f"📞Telefon raqam: {data.get('phone')}\n")
@@ -132,33 +133,32 @@ async def state_name(message: Message, state: FSMContext):
 
 
 @router.message(SignupStates.verify)
-async def state_name(message: Message, bot: Bot, state: FSMContext):
+async def state_name(message: Message, state: FSMContext):
     if message.text.lower() == 'ha':
         data = await state.get_data()
 
-        user = (f"{message.from_user.mention_html('👤📝User malumotlari:')}\n"
-                f"👤Ism: {data.get('name')}\n"
-                f"👱🏻‍♂️/👩Jinsi: {data.get('gender')}\n"
-                f"📅Yosh: {data.get('age')}\n"
-                f"📱Telegram: @{message.from_user.username}\n"
-                f"📞Telefon raqam: {data.get('phone')}\n")
+        user = (f"{message.from_user.mention_html('👤📝User malumotlari:')}\n\n"
+                f"👤Ism:  {data.get('name')}\n"
+                f"📅Yosh:  {data.get('age')}\n"
+                f"📱Telegram:  @{message.from_user.username}\n"
+                f"📞Telefon raqam:  {data.get('phone')}\n")
 
         api_data = {
             'name': data.get('name'),
             'username': message.from_user.username,
             'age': data.get('age'),
             'phone': data.get('phone'),
-            'gender': data.get('gender'),
             'telegram_id': message.from_user.id,
         }
 
         postResponse = requests.post(url=f"{API}/create_user/", data=api_data)
+        iteam = requests.get(url=f"{API}/items/").json()
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
             await message.answer(user + f"\n\n📝Malumotlaringiz saqlandi", parse_mode='HTML', reply_markup=menu)
-            await message.answer(f"📝Fikr va mulihazalaringiz qoldiring")
-            await state.set_state(SignupStates.feedback)
+            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+            await state.set_state(SignupStates.items)
         else:
             txt = (f"❌ Malumotlaringiz saqlanmadi \n\n"
                    f"🗑Arizani bekor qilish: /stop \n"
@@ -173,20 +173,22 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+@router.callback_query(SignupStates.items)
+async def state_name(call: CallbackQuery, state: FSMContext):
+    await state.update_data(items=call.data)
+    mes = call.data.split(':')[1]
+    await call.message.answer(f"✅Qabul qilindi\n👕 {mes}")
+    await call.message.answer(f"📝Fikr va mulohazalaringizni qoldiring", reply_markup=menu)
+    await call.answer(cache_time=4)
+
+    await state.set_state(SignupStates.feedback)
+
+
 @router.message(SignupStates.feedback)
 async def state_name(message: Message, state: FSMContext):
     await state.update_data(feedback=message.text)
     await message.answer(f"✅Fikr va mulihazalaringiz qabul qilindi\n📝{message.text}")
-    await message.answer(f"🌟 Hizmatimizni baholang", reply_markup=rate)
-
-    await state.set_state(SignupStates.rate)
-
-
-@router.callback_query(SignupStates.rate)
-async def state_name(call: CallbackQuery, state: FSMContext):
-    await state.update_data(rate=call.data)
-    await call.message.answer(f"✅Qabul qilindi\n🌟{call.data}")
-    await call.message.answer(f"📝Malumotlaringiz saqlansinmi", reply_markup=feedback_verify)
+    await message.answer(f"📝 Malumotlarni tasdiqlaysizmi", reply_markup=feedback_verify)
 
     await state.set_state(SignupStates.verify_fb)
 
@@ -196,20 +198,22 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
     if message.text.lower() == 'tasdiqlash':
         data = requests.get(url=f"{API}/users/{message.from_user.id}").json()
         data_st = await state.get_data()
+        mes = data_st.get('items').split(':')[1]
+        mes_id = data_st.get('items').split(':')[0]
 
         feed = (f"{message.from_user.mention_html('👤📝User malumotlari:')}\n"
-                f"👤Ism: {data['name']}\n"
-                f"👱🏻‍♂️/👩Jinsi: {data['gender']}\n"
-                f"📅Yosh: {data['age']}\n"
-                f"📱Telegram: @{message.from_user.username}\n"
-                f"📞Telefon raqam: {data['phone']}\n"
-                f"📝Feedback: {data_st.get('feedback')}\n"
-                f"🌟Rate: {data_st.get('rate')}⭐")
+                f"👤 Ism: {data['name']}\n"
+                f"📅 Yosh: {data['age']}\n"
+                f"📱 Telegram: @{message.from_user.username}\n"
+                f"📞 Telefon raqam: {data['phone']}\n"
+                f"👕 Mahsulot: {mes}\n"
+                f"📝 Feedback: {data_st.get('feedback')}\n"
+                )
 
         save_fb = {
             'user': int(data['id']),
             'text': data_st.get('feedback'),
-            'rate': data_st.get('rate'),
+            'items': int(mes_id),
         }
 
         postResponse = requests.post(url=f"{API}/feedback_create/", data=save_fb)
@@ -224,9 +228,9 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
             txt = (f"❌ Malumotlaringiz saqlanmadi \n\n"
                    f"🗑Arizani bekor qilish: /stop \n"
                    f"🔄Arizani boshidan boshlash: /new \n")
-            await message.answer(txt, reply_markup=check)
+            await message.answer(txt, reply_markup=feedback_verify)
     else:
-        txt = (f"✔️Arizani tasdiqlash: Ha \n"
+        txt = (f"✔️Arizani tasdiqlash: Tasdiqlash \n"
                f"🗑Arizani bekor qilish: /stop \n"
                f"🔄Arizani boshidan boshlash: /new \n")
-        await message.answer(txt, reply_markup=check)
+        await message.answer(txt, reply_markup=feedback_verify)
