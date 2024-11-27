@@ -1,7 +1,7 @@
 from aiogram import F, Router, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, CommandStart, and_f
-from buttons.reply import menu, phone, check, feedback_verify
+from buttons.reply import menu, phone, check
 from buttons.inline import items_inline
 from states import SignupStates
 from aiogram.fsm.context import FSMContext
@@ -14,21 +14,24 @@ router = Router()
 
 @router.message(CommandStart())
 async def start(message: Message):
-    await message.answer(
-        f'👋🏻Assalomu alaykum {message.from_user.full_name} \n🫡bizning xizmatlar xaqida fikringizni qoldiring',
-        reply_markup=menu)
+    text1 = f'👋🏻Assalomu alaykum {message.from_user.full_name} 🫡bizning xizmatlar xaqida fikringizni qoldiring'
+    text2 = f'👋🏻Здравствуйте, {message.from_user.full_name} 🫡оставьте свой отзыв о наших услугах'
+    await message.answer(text1, reply_markup=menu)
+    await message.answer(text2, reply_markup=menu)
 
 
-@router.message(F.text == '📝Feedback qoldirish')
+@router.message(F.text == '📝 Fikr qoldirish / Оставить комментарий')
 async def signup(message: Message, state: FSMContext):
     res = requests.get(url=f"{API}/users/{message.from_user.id}")
     if res.status_code == 404:
-        await message.answer(f"❗ Fikr-mulohazalaringizni qoldirish uchun botda ro'yhatdan o'ting")
-        await message.answer(f'👤To\'liq Ismingizni kiriting')
+        await message.answer(f"❗ Fikr-mulohazalaringizni qoldirish uchun botda ro'yhatdan o'ting\n\n"
+                             f"Зарегистрируйтесь в боте, чтобы оставить свой отзыв")
+        await message.answer(f'👤Ismingizni kiriting / Введите свое имя')
         await state.set_state(SignupStates.name)
     else:
         iteam = requests.get(url=f"{API}/items/").json()
-        await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+        await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz? / Какой товар вы купили?",
+                             reply_markup=items_inline(iteam))
         await state.set_state(SignupStates.items)
 
 
@@ -36,9 +39,10 @@ async def signup(message: Message, state: FSMContext):
 async def state_name(message: Message, state: FSMContext):
     curent = await state.get_state()
     if curent == None:
-        await message.answer('🔍To\'xtatish uchun ma\'lumot mavjud emas', reply_markup=menu)
+        await message.answer('🔍 To\'xtatish uchun ma\'lumot mavjud emas / Нет информации, чтобы остановить',
+                             reply_markup=menu)
     else:
-        await message.answer(f"❌ Jarayon bekor qilindi", reply_markup=menu)
+        await message.answer(f"❌ Jarayon bekor qilindi / Процесс отменен", reply_markup=menu)
         await state.clear()
 
 
@@ -50,21 +54,24 @@ async def state_name(message: Message, state: FSMContext):
     iteam = requests.get(url=f"{API}/items/").json()
     if res.status_code == 404:
         if curent == None:
-            await message.answer(f"❗ Fikr-mulohazalaringizni qoldirish uchun botda ro'yhatdan o'ting")
-            await message.answer(f'👤To\'liq Ismingizni kiriting', reply_markup=menu)
+            await message.answer(f"❗ Fikr-mulohazalaringizni qoldirish uchun botda ro'yhatdan o'ting\n\n"
+                                 f"Зарегистрируйтесь в боте, чтобы оставить свой отзыв")
+            await message.answer(f'👤Ismingizni kiriting / Введите свое имя', reply_markup=menu)
             await state.set_state(SignupStates.name)
         else:
             await state.clear()
-            await message.answer(f'👤To\'liq Ismingizni kiriting', reply_markup=menu)
+            await message.answer(f'👤Ismingizni kiriting / Введите свое имя', reply_markup=menu)
             await state.set_state(SignupStates.name)
 
     else:
         if curent == None:
-            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz / Какой товар вы купили?",
+                                 reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
         else:
             await state.clear()
-            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz / Какой товар вы купили?",
+                                 reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
 
 
@@ -73,13 +80,13 @@ async def state_name(message: Message, state: FSMContext):
     if 4 <= len(message.text) <= 50:
         if not any(digit in message.text for digit in '0123456789'):
             await state.update_data(name=message.text)
-            await message.answer(f"✅Ism qabul qilindi\n👤 {message.text}")
-            await message.answer(f"📅Yoshingizni kiriting")
+            await message.answer(f"✅Ism qabul qilindi / Имя принято\n👤 {message.text}")
+            await message.answer(f"📅Yoshingizni kiriting / Введите свой возраст")
             await state.set_state(SignupStates.age)
         else:
-            await message.answer("❌ Ismda raqamlar bo\'lishi mumkunemas")
+            await message.answer("❌ Ismda raqamlar bo\'lishi mumkunemas / Невозможно иметь цифры в имени")
     else:
-        await message.answer("❌ Kiritgan malumotingiz uzunligi xato")
+        await message.answer("❌ Kiritgan malumotingiz uzunligi xato / Длина введенной вами информации неверна")
 
 
 # @router.callback_query(SignupStates.gender)
@@ -102,29 +109,31 @@ async def state_name(message: Message, state: FSMContext):
 async def state_name(message: Message, state: FSMContext):
     if message.text.isdigit() and 4 < int(message.text) < 150:
         await state.update_data(age=message.text)
-        await message.answer(f"✅Yosh qabul qilindi\n📅 {message.text}")
-        await message.answer(f"📞Telefon raqamingizni jo'nating", reply_markup=phone)
+        await message.answer(f"✅Yosh qabul qilindi / Молодые приняты\n📅 {message.text}")
+        await message.answer(f"📞Telefon raqamingizni jo'nating / Отправьте свой номер телефона", reply_markup=phone)
         await state.set_state(SignupStates.phone)
     else:
-        await message.answer("❌ Yoshni to'g'ri kiriting")
+        await message.answer(
+            "❌ Yoshni to'g'ri kiriting (4 va 150 oralig\'ida)\nВведите правильный возраст (от 4 до 150 лет)")
 
 
 @router.message(and_f(SignupStates.phone, F.contact))
 async def state_name(message: Message, state: FSMContext):
     if message.contact:
         await state.update_data(phone=message.contact.phone_number)
-        await message.answer(f"✅Telefon raqam qabul qilindi\n📞 {message.contact.phone_number}")
+        await message.answer(f"✅Telefon raqam qabul qilindi / Номер телефона получен\n📞 {message.contact.phone_number}")
 
         data = await state.get_data()
 
-        user = (f"{message.from_user.mention_html('👤📝User malumotlari:')}\n\n"
-                f"👤Ism: {data.get('name')}\n"
-                f"📅Yosh: {data.get('age')}\n"
-                f"📱Telegram: @{message.from_user.username}\n"
-                f"📞Telefon raqam: {data.get('phone')}\n")
+        user = (f"{message.from_user.mention_html('👤📝User malumotlari / Информация о пользователе:')}\n\n"
+                f"👤Ism / Имя: {data.get('name')}\n"
+                f"📅Yosh / Молодой: {data.get('age')}\n"
+                f"📱Telegram / Телеграм: @{message.from_user.username}\n"
+                f"📞Telefon raqam / Номер телефона: {data.get('phone')}\n")
 
-        await message.answer(f"{user} \n\nHa yoki /new ni tanlang", parse_mode='HTML',
-                             reply_markup=check)
+        await message.answer(user, parse_mode='HTML', reply_markup=check)
+        await message.answer(f"Malumotlarni tasdiqlaysizmi?\nYes yoki /new ni tanlang")
+        await message.answer(f"Подтвердите информацию?\nВыберите Yes или /new")
 
         await state.set_state(SignupStates.verify)
 
@@ -134,14 +143,14 @@ async def state_name(message: Message, state: FSMContext):
 
 @router.message(SignupStates.verify)
 async def state_name(message: Message, state: FSMContext):
-    if message.text.lower() == 'ha':
+    if message.text.lower() == 'yes':
         data = await state.get_data()
 
-        user = (f"{message.from_user.mention_html('👤📝User malumotlari:')}\n\n"
-                f"👤Ism:  {data.get('name')}\n"
-                f"📅Yosh:  {data.get('age')}\n"
-                f"📱Telegram:  @{message.from_user.username}\n"
-                f"📞Telefon raqam:  {data.get('phone')}\n")
+        user = (f"{message.from_user.mention_html('👤📝User malumotlari / Информация о пользователе:')}\n\n"
+                f"👤Ism / Имя: {data.get('name')}\n"
+                f"📅Yosh / Молодой: {data.get('age')}\n"
+                f"📱Telegram / Телеграм: @{message.from_user.username}\n"
+                f"📞Telefon raqam / Номер телефона: {data.get('phone')}\n")
 
         api_data = {
             'name': data.get('name'),
@@ -156,18 +165,20 @@ async def state_name(message: Message, state: FSMContext):
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
-            await message.answer(user + f"\n\n📝Malumotlaringiz saqlandi", parse_mode='HTML', reply_markup=menu)
-            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz", reply_markup=items_inline(iteam))
+            await message.answer(user + f"\n\n📝Malumotlaringiz saqlandi / Ваша информация сохранена", parse_mode='HTML',
+                                 reply_markup=menu)
+            await message.answer(f"👕 Qaysi mahsulotni sotib oldingiz? / Какой товар вы купили?",
+                                 reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
         else:
-            txt = (f"❌ Malumotlaringiz saqlanmadi \n\n"
-                   f"🗑Arizani bekor qilish: /stop \n"
-                   f"🔄Arizani boshidan boshlash: /new \n")
+            txt = (f"❌ Malumotlaringiz saqlanmadi / Ваши данные не были сохранены \n\n"
+                   f"🗑Jarayonni bekor qilish / Отменить процесс: /stop \n"
+                   f"🔄Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
             await message.answer(txt, reply_markup=check)
     else:
-        txt = (f"✔️Arizani tasdiqlash: Ha \n"
-               f"🗑Arizani bekor qilish: /stop \n"
-               f"🔄Arizani boshidan boshlash: /new \n")
+        txt = (f"✔️Malumotlarni tasdiqlash / Проверка данных: Yes \n"
+               f"🗑Jarayonni bekor qilish / Отменить процесс: /stop \n"
+               f"🔄Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
         await message.answer(txt, reply_markup=check)
 
 
@@ -177,8 +188,9 @@ async def state_name(message: Message, state: FSMContext):
 async def state_name(call: CallbackQuery, state: FSMContext):
     await state.update_data(items=call.data)
     mes = call.data.split(':')[1]
-    await call.message.answer(f"✅Qabul qilindi\n👕 {mes}")
-    await call.message.answer(f"📝Fikr va mulohazalaringizni qoldiring", reply_markup=menu)
+    await call.message.answer(f"✅Qabul qilindi / Принял\n👕 {mes}")
+    await call.message.answer(f"📝Fikr va mulohazalaringizni qoldiring\nОставляйте свои комментарии и отзывы",
+                              reply_markup=menu)
     await call.answer(cache_time=4)
 
     await state.set_state(SignupStates.feedback)
@@ -187,15 +199,17 @@ async def state_name(call: CallbackQuery, state: FSMContext):
 @router.message(SignupStates.feedback)
 async def state_name(message: Message, state: FSMContext):
     await state.update_data(feedback=message.text)
-    await message.answer(f"✅Fikr va mulihazalaringiz qabul qilindi\n📝{message.text}")
-    await message.answer(f"📝 Malumotlarni tasdiqlaysizmi", reply_markup=feedback_verify)
+    await message.answer(
+        f"✅Fikr va mulihazalaringiz qabul qilindi\nВаши комментарии и предложения приветствуются\n📝{message.text}")
+    await message.answer(f"📝 Malumotlarni tasdiqlaysizmi?\nYes yoki /new ni tanlang", reply_markup=check)
+    await message.answer(f"📝 Подтвердите информацию?\nВыберите Yes или /new", reply_markup=check)
 
     await state.set_state(SignupStates.verify_fb)
 
 
 @router.message(SignupStates.verify_fb)
 async def state_name(message: Message, bot: Bot, state: FSMContext):
-    if message.text.lower() == 'tasdiqlash':
+    if message.text.lower() == 'yes':
         data = requests.get(url=f"{API}/users/{message.from_user.id}").json()
         data_st = await state.get_data()
         mes = data_st.get('items').split(':')[1]
@@ -222,15 +236,17 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
             json.dumps(postResponse.json(), indent=4)
             await message.answer(f"📝Malumotlaringiz Adminga yuborildi fikr qoldirganingiz uchun rahmat",
                                  reply_markup=menu)
+            await message.answer(f"📝Ваша информация отправлена администратору. Спасибо за комментарий.",
+                                 reply_markup=menu)
             await bot.send_message(ADMIN, f"📝Yangi malumot:\n\n{feed}", parse_mode='HTML')
             await state.clear()
         else:
-            txt = (f"❌ Malumotlaringiz saqlanmadi \n\n"
-                   f"🗑Arizani bekor qilish: /stop \n"
-                   f"🔄Arizani boshidan boshlash: /new \n")
-            await message.answer(txt, reply_markup=feedback_verify)
+            txt = (f"❌ Malumotlaringiz saqlanmadi / Ваши данные не были сохранены \n\n"
+                   f"🗑Jarayonni bekor qilish / Отменить процесс: /stop \n"
+                   f"🔄Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
+            await message.answer(txt, reply_markup=check)
     else:
-        txt = (f"✔️Arizani tasdiqlash: Tasdiqlash \n"
-               f"🗑Arizani bekor qilish: /stop \n"
-               f"🔄Arizani boshidan boshlash: /new \n")
-        await message.answer(txt, reply_markup=feedback_verify)
+        txt = (f"✔️Malumotlarni tasdiqlash / Проверка данных: Yes \n"
+               f"🗑Jarayonni bekor qilish / Отменить процесс: /stop \n"
+               f"🔄Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
+        await message.answer(txt, reply_markup=check)

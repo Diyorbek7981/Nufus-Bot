@@ -24,10 +24,10 @@ async def start():
     dp.startup.register(bot_started)
     dp.shutdown.register(bot_stopped)
     await bot.set_my_commands([
-        BotCommand(command='/start', description='Botni ishga tushurish'),
-        BotCommand(command='/help', description='Yordam uchun'),
-        BotCommand(command='/stop', description='Jarayonni to\'xtatish'),
-        BotCommand(command='/new', description='Jarayonni boshidan boshlash'),
+        BotCommand(command='/start', description='Botni ishga tushurish / Запустить бота'),
+        BotCommand(command='/help', description='Yordam uchun / Для помощи'),
+        BotCommand(command='/stop', description='Jarayonni to\'xtatish / Остановить процесс'),
+        BotCommand(command='/new', description='Jarayonni boshidan boshlash / Начать процесс с начала'),
     ])
     dp.include_router(router)
     await bot.delete_webhook(drop_pending_updates=True)

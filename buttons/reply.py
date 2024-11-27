@@ -3,7 +3,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 menu = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="📝Feedback qoldirish")
+            KeyboardButton(text="📝 Fikr qoldirish / Оставить комментарий")
         ]
     ],
     resize_keyboard=True,
@@ -25,21 +25,7 @@ phone = ReplyKeyboardMarkup(
 check = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text='Ha'),
-        ],
-        [
-            KeyboardButton(text='/new'),
-        ]
-    ],
-    resize_keyboard=True,
-    one_time_keyboard=True,
-    input_field_placeholder='Kerakli bo\'limni tanlang'
-)
-
-feedback_verify = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Tasdiqlash'),
+            KeyboardButton(text='Yes'),
         ],
         [
             KeyboardButton(text='/new'),

@@ -1,14 +1,14 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-gender = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text='👱🏻‍♂️Erkak', callback_data='Erkak'),
-            InlineKeyboardButton(text='👩Ayol', callback_data='Ayol'),
-        ]
-    ], resize_keyboard=True
-)
+# gender = InlineKeyboardMarkup(
+#     inline_keyboard=[
+#         [
+#             InlineKeyboardButton(text='👱🏻‍♂️Erkak', callback_data='Erkak'),
+#             InlineKeyboardButton(text='👩Ayol', callback_data='Ayol'),
+#         ]
+#     ], resize_keyboard=True
+# )
 
 
 def items_inline(data: list):
