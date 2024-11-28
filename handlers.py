@@ -198,14 +198,17 @@ async def state_name(call: CallbackQuery, state: FSMContext):
 
 @router.message(SignupStates.feedback)
 async def state_name(message: Message, state: FSMContext):
-    await state.update_data(feedback=message.text)
-    await message.answer(
-        f"✅Fikr va mulihazalaringiz qabul qilindi\nВаши комментарии и предложения приветствуются\n📝{message.text}")
-    await message.answer(f"📝 Malumotlarni tasdiqlaysizmi?\nTasdiqlash: Yes\nBoshidan boshlash: /new ni tanlang",
-                         reply_markup=check)
-    await message.answer(f"📝 Подтвердите информацию?\nПодтвердите: Yes\nНачать заново: /new", reply_markup=check)
+    if message.text is not None:
+        await state.update_data(feedback=message.text)
+        await message.answer(
+            f"✅Fikr va mulohazalaringiz qabul qilindi\nВаши комментарии и предложения приветствуются\n📝{message.text}")
+        await message.answer(f"📝 Malumotlarni tasdiqlaysizmi?\nTasdiqlash: Yes\nBoshidan boshlash: /new ni tanlang",
+                             reply_markup=check)
+        await message.answer(f"📝 Подтвердите информацию?\nПодтвердите: Yes\nНачать заново: /new", reply_markup=check)
 
-    await state.set_state(SignupStates.verify_fb)
+        await state.set_state(SignupStates.verify_fb)
+    else:
+        await message.answer(f"❌ Matnli malumot yuboring / Отправить текстовое сообщение")
 
 
 @router.message(SignupStates.verify_fb)
