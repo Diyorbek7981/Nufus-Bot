@@ -145,6 +145,8 @@ async def state_name(message: Message, state: FSMContext):
             json.dumps(postResponse.json(), indent=4)
             await message.answer(f"👕 Harid qilgan mahsulotingiz / Купленный товар",
                                  reply_markup=items_inline(iteam))
+
+            await message.answer(reply_markup=menu)
             await state.set_state(SignupStates.items)
         else:
             txt = (f"❌ Malumotlaringiz saqlanmadi / Ваши данные не были сохранены \n\n"
