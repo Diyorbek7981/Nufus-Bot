@@ -202,7 +202,7 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
         mes = data_st.get('items').split(':')[1]
         mes_id = data_st.get('items').split(':')[0]
 
-        feed = (f"{message.from_user.mention_html('👤📝 User malumotlari:')}\n"
+        feed = (f"{message.from_user.mention_html('👤📝 User malumotlari: ')}\n"
                 f"👤 Ism: {data['name']}\n"
                 f"📅 Yosh: {data['age']}\n"
                 f"📱 Telegram: @{message.from_user.username}\n"
