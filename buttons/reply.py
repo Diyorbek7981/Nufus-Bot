@@ -14,7 +14,7 @@ menu = ReplyKeyboardMarkup(
 phone = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text='Contact ulashish', request_contact=True),
+            KeyboardButton(text='Kontakt ulashish / Поделиться контактом', request_contact=True),
         ],
     ],
     resize_keyboard=True,
