@@ -213,9 +213,9 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
-            await message.answer(f"📝 Qabul qilindi, fikr va mulohazalaringizni qoldirganingiz uchun rahmat.",
+            await message.answer(f"📝 Qabul qilindi. Fikr va mulohazalaringiz uchun rahmat.",
                                  reply_markup=menu)
-            await message.answer(f"📝 Принято, спасибо за комментарии и отзывы.",
+            await message.answer(f"📝 Принято. Спасибо за Ваши комментарии и предложения.",
                                  reply_markup=menu)
             await bot.send_message(ADMIN, f"📝 Yangi malumot:\n\n{feed}", parse_mode='HTML')
             await state.clear()
