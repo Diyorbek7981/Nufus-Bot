@@ -130,12 +130,6 @@ async def state_name(message: Message, state: FSMContext):
     if message.text.lower() == 'yes':
         data = await state.get_data()
 
-        user = (f"{message.from_user.mention_html('👤📝 Malumotlari / Информация:')}\n\n"
-                f"👤 Ism / Имя: {data.get('name')}\n"
-                f"📅 Yosh / Возраст: {data.get('age')}\n"
-                f"📱 Telegram / Телеграм: @{message.from_user.username}\n"
-                f"📞 Telefon raqam / Номер телефона: {data.get('phone')}\n")
-
         api_data = {
             'name': data.get('name'),
             'username': message.from_user.username,
@@ -149,8 +143,6 @@ async def state_name(message: Message, state: FSMContext):
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
-            await message.answer(user, parse_mode='HTML',
-                                 reply_markup=menu)
             await message.answer(f"👕 Harid qilgan mahsulotingiz / Купленный товар",
                                  reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
