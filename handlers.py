@@ -70,8 +70,8 @@ async def state_name(message: Message, state: FSMContext):
             await state.set_state(SignupStates.items)
         else:
             await state.clear()
-            await message.answer(f"👕 Harid qilgan mahsulotingiz / Купленный товар",
-                                 reply_markup=items_inline(iteam))
+            await message.answer(f"📝 Ma'lumotlarni kiriting / Введите информацию", reply_markup=menu)
+            await message.answer(f"👕 Harid qilgan mahsulotingiz / Купленный товар", reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
 
 
@@ -86,7 +86,7 @@ async def state_name(message: Message, state: FSMContext):
         else:
             await message.answer("❌ Ismda raqamlar bo\'lishi mumkunemas / Невозможно иметь цифры в имени")
     else:
-        await message.answer("❌ Kiritgan malumotingiz uzunligi xato / Длина введенной вами информации неверна")
+        await message.answer("❌ Kiritgan ma'lumotingiz uzunligi xato / Длина введенной вами информации неверна")
 
 
 @router.message(SignupStates.age)
@@ -109,20 +109,20 @@ async def state_name(message: Message, state: FSMContext):
 
         data = await state.get_data()
 
-        user = (f"{message.from_user.mention_html('👤📝 Malumotlar / Информация:')}\n\n"
+        user = (f"{message.from_user.mention_html('👤📝 Ma`lumotlar / Информация:')}\n\n"
                 f"👤 Ism / Имя: {data.get('name')}\n"
                 f"📅 Yosh / Возраст: {data.get('age')}\n"
                 f"📱 Telegram / Телеграм: @{message.from_user.username}\n"
                 f"📞 Telefon raqam / Номер телефона: {data.get('phone')}\n")
 
         await message.answer(user, parse_mode='HTML', reply_markup=check)
-        await message.answer(f"Malumotlarni tasdiqlaysizmi?\nTasdiqlash: Yes\nBoshidan boshlash: /new ni tanlang")
+        await message.answer(f"Ma\'lumotlarni tasdiqlaysizmi?\nTasdiqlash: Yes\nBoshidan boshlash: /new ni tanlang")
         await message.answer(f"Подтвердите информацию?\nПодтвердите: Yes\nНачать заново: /new")
 
         await state.set_state(SignupStates.verify)
 
     else:
-        await message.answer("❌ Contact malumotini yuboring")
+        await message.answer("❌ Contact ma'lumotini yuboring")
 
 
 @router.message(SignupStates.verify)
@@ -143,17 +143,17 @@ async def state_name(message: Message, state: FSMContext):
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
-            await message.answer(f"✅ Ro'yhatdan o'ttingiz / Вы зарегистрированы",reply_markup=menu)
+            await message.answer(f"✅ Ro'yhatdan o'ttingiz / Вы зарегистрированы", reply_markup=menu)
             await message.answer(f"👕 Harid qilgan mahsulotingiz / Купленный товар",
                                  reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
         else:
-            txt = (f"❌ Malumotlaringiz saqlanmadi / Ваши данные не были сохранены \n\n"
+            txt = (f"❌ Ma'lumotlaringiz saqlanmadi / Ваши данные не были сохранены \n\n"
                    f"🗑 Jarayonni bekor qilish / Отменить процесс: /stop \n"
                    f"🔄 Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
             await message.answer(txt, reply_markup=check)
     else:
-        txt = (f"✔️ Malumotlarni tasdiqlash / Проверка данных: Yes \n"
+        txt = (f"✔️ Ma\'lumotlarni tasdiqlash / Проверка данных: Yes \n"
                f"🗑 Jarayonni bekor qilish / Отменить процесс: /stop \n"
                f"🔄 Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
         await message.answer(txt, reply_markup=check)
@@ -178,13 +178,13 @@ async def state_name(message: Message, state: FSMContext):
     if message.text is not None:
         await state.update_data(feedback=message.text)
         await message.answer(f"✅ Qabul qilindi / Принято\n📝 {message.text}")
-        await message.answer(f"📝 Malumotlarni tasdiqlaysizmi?\nTasdiqlash: Yes\nBoshidan boshlash: /new ni tanlang",
+        await message.answer(f"📝 Ma\'lumotlarni tasdiqlaysizmi?\nTasdiqlash: Yes\nBoshidan boshlash: /new ni tanlang",
                              reply_markup=check)
         await message.answer(f"📝 Подтвердите информацию?\nПодтвердите: Yes\nНачать заново: /new", reply_markup=check)
 
         await state.set_state(SignupStates.verify_fb)
     else:
-        await message.answer(f"❌ Matnli malumot yuboring / Отправить текстовое сообщение")
+        await message.answer(f"❌ Matnli ma'lumot yuboring / Отправить текстовое сообщение")
 
 
 @router.message(SignupStates.verify_fb)
@@ -195,7 +195,7 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
         mes = data_st.get('items').split(':')[1]
         mes_id = data_st.get('items').split(':')[0]
 
-        feed = (f"{message.from_user.mention_html('👤📝 User malumotlari: ')}\n"
+        feed = (f"{message.from_user.mention_html('👤📝 User ma`lumotlari: ')}\n"
                 f"👤 Ism: {data['name']}\n"
                 f"📅 Yosh: {data['age']}\n"
                 f"📱 Telegram: @{message.from_user.username}\n"
@@ -218,15 +218,15 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
                                  reply_markup=menu)
             await message.answer(f"📝 Принято. Спасибо за Ваши комментарии и предложения.",
                                  reply_markup=menu)
-            await bot.send_message(ADMIN, f"📝 Yangi malumot:\n\n{feed}", parse_mode='HTML')
+            await bot.send_message(ADMIN, f"📝 Yangi ma'lumot:\n\n{feed}", parse_mode='HTML')
             await state.clear()
         else:
-            txt = (f"❌ Malumotlaringiz saqlanmadi / Ваши данные не были сохранены \n\n"
+            txt = (f"❌ Ma'lumotlaringiz saqlanmadi / Ваши данные не были сохранены \n\n"
                    f"🗑Jarayonni bekor qilish / Отменить процесс: /stop \n"
                    f"🔄Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
             await message.answer(txt, reply_markup=check)
     else:
-        txt = (f"✔️ Malumotlarni tasdiqlash / Проверка данных: Yes \n"
+        txt = (f"✔️ Ma\'lumotlarni tasdiqlash / Проверка данных: Yes \n"
                f"🗑 Jarayonni bekor qilish / Отменить процесс: /stop \n"
                f"🔄 Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
         await message.answer(txt, reply_markup=check)
