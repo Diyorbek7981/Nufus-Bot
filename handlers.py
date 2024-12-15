@@ -14,7 +14,7 @@ router = Router()
 
 @router.message(CommandStart())
 async def start(message: Message):
-    text1 = f'👋🏻 Assalomu alaykum {message.from_user.full_name} bizning mahsulot haqida o\'z fikringizni qoldiring'
+    text1 = f'👋🏻 Assalomu alaykum, {message.from_user.full_name} bizning mahsulot haqida o\'z fikringizni qoldiring'
     text2 = f'👋🏻 Здравствуйте, {message.from_user.full_name} оставьте свое мнение о нашем товаре'
     await message.answer(text1, reply_markup=menu)
     await message.answer(text2, reply_markup=menu)
@@ -24,7 +24,7 @@ async def start(message: Message):
 async def signup(message: Message, state: FSMContext):
     res = requests.get(url=f"{API}/users/{message.from_user.id}")
     if res.status_code == 404:
-        await message.answer(f"❗ Fikr va mulohazalaringizni qoldirish uchun botda ro'yhatdan o'ting,\n\n"
+        await message.answer(f"❗ Fikr va mulohazalaringizni qoldirish uchun botda ro'yxatdan o'ting,\n\n"
                              f"❗ Зарегистрируйтесь в боте, чтобы оставить свой отзыв")
         await message.answer(f'👤 Ismingizni kiriting / Введите свое имя')
         await state.set_state(SignupStates.name)
@@ -54,7 +54,7 @@ async def state_name(message: Message, state: FSMContext):
     iteam = requests.get(url=f"{API}/items/").json()
     if res.status_code == 404:
         if curent == None:
-            await message.answer(f"❗ Fikr va mulohazalaringizni qoldirish uchun botda ro'yhatdan o'ting,\n\n"
+            await message.answer(f"❗ Fikr va mulohazalaringizni qoldirish uchun botda ro'yxatdan o'ting,\n\n"
                                  f"❗ Зарегистрируйтесь в боте, чтобы оставить свой отзыв")
             await message.answer(f'👤 Ismingizni kiriting / Введите свое имя', reply_markup=menu)
             await state.set_state(SignupStates.name)
@@ -143,7 +143,7 @@ async def state_name(message: Message, state: FSMContext):
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
-            await message.answer(f"✅ Ro'yhatdan o'ttingiz / Вы зарегистрированы", reply_markup=menu)
+            await message.answer(f"✅ Ro'yxatdan o'ttingiz / Вы зарегистрированы", reply_markup=menu)
             await message.answer(f"👕 Harid qilgan mahsulotingiz / Купленный товар",
                                  reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
@@ -166,7 +166,7 @@ async def state_name(call: CallbackQuery, state: FSMContext):
     await state.update_data(items=call.data)
     mes = call.data.split(':')[1]
     await call.message.answer(f"✅ Qabul qilindi / Принято\n👕 {mes}")
-    await call.message.answer(f"📝 Fikr va mulohazalaringizni qoldiring,\nОставляйте свои комментарии и отзывы",
+    await call.message.answer(f"📝 Fikr va mulohazalaringizni qoldiring,\nОставьте свои комментарии и отзывы",
                               reply_markup=menu)
     await call.answer(cache_time=4)
 
