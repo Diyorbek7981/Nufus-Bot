@@ -143,7 +143,7 @@ async def state_name(message: Message, state: FSMContext):
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
-            await message.answer(f"✅ Ro'yxatdan o'ttingiz / Вы зарегистрированы", reply_markup=menu)
+            await message.answer(f"✅ Ro'yxatdan o'tdingiz / Вы зарегистрированы", reply_markup=menu)
             await message.answer(f"👕 Harid qilgan mahsulotingiz / Купленный товар",
                                  reply_markup=items_inline(iteam))
             await state.set_state(SignupStates.items)
@@ -174,23 +174,10 @@ async def state_name(call: CallbackQuery, state: FSMContext):
 
 
 @router.message(SignupStates.feedback)
-async def state_name(message: Message, state: FSMContext):
+async def state_name(message: Message, state: FSMContext, bot: Bot):
     if message.text is not None:
-        await state.update_data(feedback=message.text)
-        await message.answer(f"✅ Qabul qilindi / Принято\n📝 {message.text}")
-        await message.answer(f"📝 Ma\'lumotlarni tasdiqlaysizmi?\nTasdiqlash: Yes\nBoshidan boshlash: /new ni tanlang",
-                             reply_markup=check)
-        await message.answer(f"📝 Подтвердите информацию?\nПодтвердите: Yes\nНачать заново: /new", reply_markup=check)
-
-        await state.set_state(SignupStates.verify_fb)
-    else:
-        await message.answer(f"❌ Matnli ma'lumot yuboring / Отправить текстовое сообщение")
-
-
-@router.message(SignupStates.verify_fb)
-async def state_name(message: Message, bot: Bot, state: FSMContext):
-    if message.text.lower() == 'yes':
         data = requests.get(url=f"{API}/users/{message.from_user.id}").json()
+        await state.update_data(feedback=message.text)
         data_st = await state.get_data()
         mes = data_st.get('items').split(':')[1]
         mes_id = data_st.get('items').split(':')[0]
@@ -214,9 +201,10 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
 
         if postResponse.status_code in [200, 201]:
             json.dumps(postResponse.json(), indent=4)
-            await message.answer(f"📝 Qabul qilindi. Fikr va mulohazalaringiz uchun rahmat.",
+            await message.answer(f"✅ Qabul qilindi / Принято\n📝 {message.text}")
+            await message.answer(f"📝 Fikr va mulohazalaringiz uchun rahmat.",
                                  reply_markup=menu)
-            await message.answer(f"📝 Принято. Спасибо за Ваши комментарии и предложения.",
+            await message.answer(f"📝 Спасибо за Ваши комментарии и предложения.",
                                  reply_markup=menu)
             await bot.send_message(ADMIN, f"📝 Yangi ma'lumot:\n\n{feed}", parse_mode='HTML')
             await state.clear()
@@ -225,8 +213,6 @@ async def state_name(message: Message, bot: Bot, state: FSMContext):
                    f"🗑Jarayonni bekor qilish / Отменить процесс: /stop \n"
                    f"🔄Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
             await message.answer(txt, reply_markup=check)
+
     else:
-        txt = (f"✔️ Ma\'lumotlarni tasdiqlash / Проверка данных: Yes \n"
-               f"🗑 Jarayonni bekor qilish / Отменить процесс: /stop \n"
-               f"🔄 Jarayonni boshidan boshlash / Начать процесс с начала: /new \n")
-        await message.answer(txt, reply_markup=check)
+        await message.answer(f"❌ Matnli ma'lumot yuboring / Отправить текстовое сообщение")

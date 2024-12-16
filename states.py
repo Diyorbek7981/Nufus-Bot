@@ -8,4 +8,3 @@ class SignupStates(StatesGroup):
     verify = State()
     feedback = State()
     items = State()
-    verify_fb = State()
