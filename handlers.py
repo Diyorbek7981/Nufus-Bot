@@ -35,6 +35,15 @@ async def signup(message: Message, state: FSMContext):
         await state.set_state(SignupStates.items)
 
 
+@router.message(Command("help"))
+async def state_name(message: Message):
+    res = requests.get(url=f"{API}/users/{ADMIN}").json()
+    if res:
+        await message.answer(
+            f"👨🏻‍💻 Yordam uchun Adminga murojat qiling,\nОбратитесь к администратору за помощью\nhttps://t.me/{res['username']}")
+    else:
+        await message.answer()
+
 @router.message(Command("stop"))
 async def state_name(message: Message, state: FSMContext):
     curent = await state.get_state()
