@@ -1,6 +1,6 @@
 from aiogram import F, Router, Bot
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Command, CommandStart, and_f
+from aiogram.filters import Command, CommandStart
 from buttons.reply import menu, phone, check
 from buttons.inline import items_inline
 from states import SignupStates
